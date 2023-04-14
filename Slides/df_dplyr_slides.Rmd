@@ -1,0 +1,746 @@
+---
+title: "Data frames and dplyr"
+#subtitle: "Lab at the University of Oregon"
+author: "Claire Lepault"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'metropolis', 'metropolis-fonts', 'my-css.css']
+    # self_contained: true
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+knit: pagedown::chrome_print
+---
+exclude: true
+
+```{R, setup, include = F}
+library(pacman)
+p_load(
+  broom, tidyverse,
+  ggplot2, ggthemes, ggforce, ggridges, cowplot,
+  latex2exp, viridis, extrafont, gridExtra,
+  kableExtra, snakecase, janitor,
+  DT, data.table, dplyr,
+  lubridate, knitr, future, furrr,
+  estimatr, FNN, parsnip,
+  huxtable, here, magrittr
+)
+# Define colors
+red_pink   = "#e64173"
+turquoise  = "#20B2AA"
+orange     = "#FFA500"
+red        = "#fb6107"
+blue       = "#3b3b9a"
+green      = "#8bb174"
+grey_light = "grey70"
+grey_mid   = "grey50"
+grey_dark  = "grey20"
+purple     = "#6A5ACD"
+slate      = "#314f4f"
+# Knitr options
+opts_chunk$set(
+  comment = "#>",
+  fig.align = "center",
+  fig.height = 7,
+  fig.width = 10.5,
+  warning = F,
+  message = F
+)
+opts_chunk$set(dev = "svg")
+options(device = function(file, width, height) {
+  svg(tempfile(), width = width, height = height)
+})
+
+options(knitr.table.format = "html")
+
+```
+# Prologue
+
+---
+name: schedule
+
+# Schedule
+
+## Last time
+
+Getting to know .mono[R]—objects, functions, *etc.*
+
+## Today
+
+Working with data in .mono[R].
+- The `data.frame` class
+- The `dplyr` package
+
+## References
+
+Most of these slides come from the courses offered by [Ed Rubin](http://edrub.in/) ([@EC607](https://github.com/edrubin/EC607S23)) and [Grant MacDermott](https://grantmcdermott.com/) ([@EC607](https://github.com/uo-ec607/lectures)).
+
+
+---
+#To get started
+
+</br>
+
+1. Ensure `tidyverse` is installed: `install.packages('tidyverse')`
+
+--
+
+2. Load package library: `library(tidyverse)`
+
+--
+
+3. Get information on the `storms` dataset : `?storms`
+
+--
+
+4. Display the first 2 rows of the `storms` dataset: `head(storms,2)`
+
+--
+
+5. Display the number of rows and columns of the `storms` dataset: 
+
+--
+
+```{R,print1, echo = T}
+sprintf("%i rows x %i columns", nrow(storms), ncol(storms))
+```
+
+
+---
+layout: true
+# Data frames
+---
+
+class: inverse, middle
+
+---
+
+name: df
+
+A `data.frame` is .mono[R]'s base, spreadsheet-like object that holds variables.
+
+--
+
+.ex[Example]
+
+```{R, df_storms}
+storms[1:8,c(1:8, 10:11)] %>% data.frame()
+```
+
+---
+name: creation
+
+## Creation
+
+The `data.frame()` function creates...
+--
+ `data.frame` objects.
+
+--
+
+You'll generally define data frames by passing the function<br>(.hi-slate[1]) column names and (.hi-slate[2]) values for the columns.
+
+```{R, ex_creat1, eval = F}
+data.frame(var1 = 1:5, var2 = "apple", var3 = rnorm(5))
+```
+
+--
+
+You can also assign the values using already-existing objects, _e.g._,
+
+```{R, ex_create2, eval = F}
+# An object with value
+tmp <- rnorm(5)
+# Creating the data frame
+data.frame(var1 = 1:5, var2 = "apple", var3 = tmp)
+```
+---
+
+## Creation
+
+```{R, ex_create3}
+# Creating the data frame
+our_df <- data.frame(var1 = 1:5, var2 = "apple", var3 = rnorm(5))
+# Displaying the dataframe
+our_df
+```
+--
+Notice that .mono[R] assumes we want to repeat `"apple"` for the entire column.
+
+--
+Display the number of rows and columns of the `storms` dataset: 
+
+---
+
+## Creation
+
+You can also create data frames from other objects (_e.g._, matrices) using the function `as.data.frame()`<sup>.pink[†]</sup>.
+
+.footnote[.pink[†] Or just plain, old `data.frame()`.]
+
+However, your data frame's columns will only have names if your matrix's columns had names.
+
+---
+name: names
+
+## Names (of columns)
+
+The columns (variables) in your data frame have names.<sup>.pink[†]</sup>
+
+.footnote[.pink[†] If you don't name the columns, then .mono[R] will.]
+
+.qa[Q] What if you want to see/know those names?
+
+--
+
+.qa[A] You've got a few options.
+
+--
+
+1. The `names()` function returns the *names* of an object. Try `names(our_df)`
+
+--
+
+2. `head(our_df, x)` will show you the first `x` rows of `our_df`.
+
+--
+
+3. In .mono[RStudio]: `View(our_df)` or look in your .mono[Environment] tab.
+---
+
+## Naming
+
+The `names()` function will also help you rename any/all variables.
+
+--
+
+Change the names of .b[all variables] (include a name for each variable):
+```{R, change_names_all, echo = T}
+# Set new names
+names(our_df) <- c("name1", "name2", "name3")
+names(our_df)
+```
+
+--
+
+Change the name of .b[the second variable] (only):
+```{R, change_names_one, echo = T}
+# Set new names
+names(our_df)[2] <- "col2"
+names(our_df)
+```
+---
+name: indexing
+
+## Indexing
+
+.purple[Option 1] Index data frames just as you index matrices in .mono[R].
+- `our_df[1,1]` grabs the value in the first row of the first variable.
+- `our_df[2,]` returns the second row of `our_df` (as a data frame).
+- `our_df[,3]` returns the third column (`name3`) of `our_df` (as a vector).
+
+--
+
+.purple[Option 2] Reference values/variables using columns' names.
+- `our_df$name1` returns the column named `name1` (as a vector). .hi[Top:] `$`
+- `our_df[,"name1"]` returns the column named `name1` (as a vector).
+- `our_df["name1"]` returns the column named `x` (as a data frame).
+- `our_df[,c("name1","col2")]` returns a data frame with variables `"name1"` and `"col2"`.
+---
+
+name: adding
+
+## Adding variables
+
+Just as we referenced .pink[existing] variables using `$var_name`,
+<br>we can create .purple[new] varirables using `$new_var`, _e.g._,
+
+```{R, create_var, eval = F}
+# Add a variable to our_df
+our_df$new_var <- 6:10
+```
+
+--
+
+If you want to use existing columns to create a new variable
+
+```{R, create_var2, eval = F}
+# Create interaction: multi = var1 * new_var
+our_df$multi <- our_df$name1 * our_df$new_var
+```
+--
+
+.qa[Q] Isn't there a better/faster/less-typing way?
+
+--
+
+.qa[A] Yes. *Enter* `dplyr`
+--
+ (also: `data.table`, which we'll leave for the future).
+ 
+ 
+---
+layout: true
+# dplyr
+---
+
+class: inverse, middle
+---
+name: dplyr
+
+.b.slate[Introduction]
+
+- It's is a package.
+
+--
+
+`dplyr` is part of the [`tidyverse`](https://dplyr.tidyverse.org/) (Hadleyverse), and it follows a grammar-based approach to programming/data work.
+
+--
+
+- `data` compose the subjects of your stories
+
+- `dplyr` provides the *verbs* (action words)
+:<br> `filter()`, `mutate()`, `select()`, `group_by()`, `summarize()`, `arrange()`
+
+--
+
+<br>
+
+.hi-slate[*Bonus*] `dplyr` is pretty fast and able to interact with SQL databases.
+ 
+---
+layout: true
+# Pipes and dplyr
+---
+class: inverse, middle
+
+---
+name: pipes
+
+.b.slate[Introduction]
+
+1. Pipes (`%>%`) make your life easier..super[.pink[†]]
+
+1. `dplyr` is your data-work friend.
+
+.footnote[.pink[†] Check out `magrittr` for more pipe options, _e.g._, `%<>%`.]
+---
+
+.b.slate[What is a pipe?]
+
+--
+
+Pipes are a .pink[simplifying] programming tool; make your code easier to read
+
+--
+
+Take the .hi-pink[output] of a function as the .hi-purple[input/argument] of another function
+
+--
+
+In `dplyr`, the expression for a pipe is `%>%`
+
+.footnote[.pink[†] `|>` native pipe as of .mono[R] 4.1.0
+]
+
+--
+
+.mono[R]'s pipe specifically plugs the returned object to the .pink[left] of the pipe into the first argument of the function on the .purple[right] fo the pipe, _e.g._,
+
+--
+
+```{R, ex_pipe_simple}
+rnorm(10) %>% mean()
+```
+---
+
+.b.slate[Pipes]
+
+Pipes avoid nested functions, prevent excessive writing to your disc, and increase the readability of our .mono[R] scripts
+
+--
+
+By default, .mono[R] pipes the output from the LHS of the pipe into<br>the .hi[first] argument of the function on the RHS of the pipe.
+
+--
+
+*E.g.*, `a %>% fun(3)` is equivalent to `fun(arg1 = a, arg2 = 3)`.
+
+--
+
+</br>
+
+Think [russian dolls](https://en.wikipedia.org/wiki/Matryoshka_doll)
+
+
+---
+
+layout: true
+# Key dplyr verbs using the pipe
+
+---
+class: inverse, middle
+
+---
+
+There are five key dplyr verbs that you need to learn.
+
+1. `select`: Select (i.e. subset) columns by their names. 
+
+2. `filter`: Filter (i.e. subset) rows based on their values.
+
+3. `arrange`: Arrange (i.e. reorder) rows based on their values.
+
+4. `mutate`: Create new columns.
+
+5. `summarize`: Collapse multiple rows into a single summary value.<sup>1</sup>
+
+.footnote[
+<sup>1</sup> `summarise` with a "s" works too.
+]
+
+--
+</br>
+
+Let's practice these commands together using the `storms` data frame that comes pre-packaged with dplyr. 
+
+
+---
+layout: false
+name: select
+
+# 1) select
+
+Use commas to select multiple columns out of a data frame. (You can also use "first:last" for consecutive columns). Deselect a column with "-".
+
+
+```{r select1}
+storms %>% 
+  select(name:hour, wind, pressure, -day)%>%
+  head(8)
+```
+
+---
+
+# 1) select *cont.*
+
+The `select(contains(PATTERN))` option provides a nice shortcut in relevant cases.
+
+
+```{r select2}
+storms %>% 
+  select(name, contains("diameter"))%>%
+  tail(5) #tail shows you the last x (here 5) rows of the dataframe
+```
+
+
+---
+
+# 1) select *cont.*
+
+You can also rename some (or all) of your selected variables in place.
+```{r select3}
+storms %>%
+  select(alias=name, year, month, day, hour,
+         wind_speed=wind, ts_diameter=tropicalstorm_force_diameter)%>%
+  head(4) 
+```
+
+--
+
+If you just want to rename columns without subsetting them, you can use `rename`. Try this now by replacing `select(...)` in the above code chunk with `rename(...)`.
+
+
+---
+name:filter
+
+# 2) filter
+
+We can chain multiple filter commands with the pipe (`%>%`), or just separate them within a single filter command using commas.
+
+.pull-left[
+```{r filter1, eval=F}
+storms %>% 
+  select(name,year,month,day)%>%
+  filter(year==2008,
+         month >= 6)%>%
+  head(3)
+```
+]
+
+--
+.pull-right[
+
+```{r filter1_res, echo=F, results = 'asis'}
+storms %>% 
+  select(name,year,month,day)%>%
+  filter(year==2008,
+         month >= 6)%>%
+  head(3) %>% 
+  DT::datatable(rownames = F, options = list(dom = 't'))
+```
+]
+
+--
+
+We can also use the `&` ("and") and/or `|` ("or") logical operators.
+
+.pull-left[
+```{r filter2, eval=F}
+storms %>% 
+  select(name,year,month,day)%>%
+  filter(year==2008 | 
+         month >= 6)%>%
+  head(3)
+```
+]
+
+--
+
+.pull-right[
+
+```{r filter2_res, echo=F, results = 'asis'}
+storms %>% 
+  select(name,year,month,day)%>%
+  filter(year==2008 | 
+         month >= 6)%>%
+  head(3) %>% 
+  DT::datatable(rownames = F, options = list(dom = 't'))
+```
+]
+
+
+---
+
+# 2) filter *cont.*
+
+Regular expressions work well too.
+```{r filter3}
+storms %>% 
+  select(name:status)%>%
+  filter(grepl("tropical", status))%>%
+  head(5) 
+```
+
+---
+
+# 2) filter *cont.*
+
+A very common `filter` use case is identifying (or removing) missing data cases. 
+
+
+```{r filter4}
+storms %>% 
+  select(name,year,month,day,hour,
+         ts_diameter=tropicalstorm_force_diameter)%>%
+  filter(is.na(ts_diameter))%>%
+  head(1)
+```
+
+--
+</br>
+.hi[To remove missing observations, simply use negation:] `filter(!is.na(ts_diameter))`. Try this yourself.
+
+
+---
+name: arrange
+
+# 3) arrange
+
+```{r arrange1}
+storms %>% 
+  select(name,year,month,day,hour,
+         ts_diameter=tropicalstorm_force_diameter)%>%
+  filter(!is.na(ts_diameter))%>%
+  arrange(ts_diameter)%>%
+  head(3)
+```
+
+--
+
+*Note:* Arranging on a character-based column (i.e. strings) will sort alphabetically. Try this yourself by arranging according to the "status" column.
+
+---
+
+# 3) arrange *cont.*
+
+We can also arrange items in descending order using `arrange(desc())`.
+```{r arrange2}
+storms %>% 
+  select(name,year,month,day,hour,
+         ts_diameter=tropicalstorm_force_diameter)%>%
+  filter(!is.na(ts_diameter))%>%
+  arrange(desc(ts_diameter))%>%
+  head(3)
+```
+
+---
+name: mutate
+
+# 4) mutate
+
+You can create new columns from scratch, or (more commonly) as transformations of existing columns.
+```{r mutate1}
+storms %>% 
+  select(name, year, month) %>%
+  mutate(decade = paste0(substr(year, start = 1, stop = 3),0),
+         quarter = ifelse(month %in% c(12,1,2), "Winter",
+                         ifelse(month %in% 3:5, "Spring",
+                                ifelse(month %in% 6:8,"Summer","Automn"))),
+         text = paste0(name, " occured in the", decade,"'s"))%>%
+  head(2)
+```
+`mutate` is order aware. So you can chain multiple mutates in a single call.
+
+---
+
+# 4) mutate *cont.*
+
+Combining `mutate` with the `across` feature allows you to easily work on a subset of variables. For example:
+
+```{r, mutate2}
+storms %>% 
+  select(name:status) %>% 
+  mutate(status=as.character(status),
+         across(where(is.character), toupper)) %>% 
+  head(3)
+```
+
+---
+
+# 4) mutate *cont.*
+
+`mutate_at` and `mutate_all` are also helpful. For example:
+
+```{r, mutate3}
+storms %>% 
+  select(name:status) %>% 
+  mutate_at(vars(name,status), list(UP =~ toupper(.))) %>%
+  head(3)
+```
+
+---
+name: summarize
+
+# 5) summarize and group_by()
+
+`summarize()`<sup>.pink[†]</sup> summarizes variables—you choose the variables and the summaries (_e.g._, `mean()` or `min()`). When using `group_by()`, summaries are done by groups:
+
+.footnote[.pink[†] or `summarise()`]
+
+```{r summ1}
+storms %>% 
+  select(name, year, wind, pressure) %>%
+  mutate(decade = paste0(substr(year, start = 1, stop = 3),0))%>%
+  group_by(decade) %>% 
+  summarize(Nobs = n(),
+            mean_wind = mean(wind, na.rm = TRUE),
+            max_pressure = max(pressure, na.rm = TRUE))%>%
+  head(4)
+```
+
+---
+
+# 5) summarize and group_by()
+
+Note that including "na.rm = TRUE" (or,  its alias "na.rm = T") is usually a good idea with summarize functions. Otherwise, any missing value will propogate to the summarized value too.
+```{r summ2}
+storms %>% 
+  summarize(mean_ts_diameter = mean(tropicalstorm_force_diameter))
+storms %>% 
+  summarize(mean_ts_diameter = mean(tropicalstorm_force_diameter, na.rm = TRUE))
+```
+
+---
+
+# 5) summarize and group_by()
+
+The same `if`-based workflow that we saw with `mutate` a few slides back also works with `summarize`. For example:
+
+```{r, summ3}
+storms %>% 
+  select(name, year, wind, pressure) %>%
+  mutate(decade = paste0(substr(year, start = 1, stop = 3),0))%>%
+  group_by(decade) %>% 
+  summarize_if(is.numeric, mean, na.rm=T) %>%
+  head(4)
+
+```
+
+---
+
+# 5) summarize and group_by()
+
+`summarize_at` and `summarize_all` are also useful. For example:
+
+```{r, summ4}
+storms %>% 
+  select(year, wind, pressure) %>%
+  mutate(decade = paste0(substr(year, start = 1, stop = 3),0))%>%
+  select(-year)%>%
+  group_by(decade) %>% 
+  summarize_all(list(Mean=~mean(.,na.rm=TRUE), 
+                     Min=~min(.,na.rm=TRUE),
+                     Max=~max(.,na.rm=TRUE)))
+```
+
+---
+name: tidyverse
+# The tidyverse
+
+There's more! `dplyr` and .purple[`tidyr`] offer even more....super[.pink[†]]
+
+.footnote[
+.pink[†] And these are only two of the packages in the `tidyverse`.
+]
+
+- .note[Merging] `inner_join()`,`left_join()`,`anti_join()`
+- .note[Viewing data] `glimpse()`, `top_n()`
+- .note[Sampling] `sample_n()`, `sample_frac()`
+- .note[Summaries] `first()`, `last()`, `nth()`, `n_distinct()`
+- .note[Duplicates] `distinct()`
+- .note[Missingness] `na_if()`, .purple[`replace_na()`], .purple[`drop_na()`], .purple[`fill()`]
+- .note[Tidying]  .purple[`pivot_longer()`], .purple[`pivot_wider()`]
+
+
+--
+
+The folks at RStudio have put together some great cheatsheets, *e.g.*,
+- [`dplyr`](https://raw.githack.com/edrubin/EC524W20/master/resources/cheatsheet-dplyr.pdf)
+- [data import](https://raw.githack.com/edrubin/EC524W20/master/resources/cheatsheet-data-import.pdf)
+- [data wrangling](https://raw.githack.com/edrubin/EC524W20/master/resources/cheatsheet-data-wrangling.pdf)
+
+---
+layout: false
+# Table of contents
+
+.col-left[
+.small[
+#### Prologue
+- [To get started](#schedule)
+
+#### Data frames
+- [General](#df)
+- [Creation](#creation)
+- [Naming](#names)
+- [Indexing](#indexing)
+- [Adding](#adding)
+]]
+
+.col-right[
+.small[
+#### `dplyr`
+- [General](#dplyr)
+- [Pipes](#pipes)
+- [`select()`](#select)
+- [`filter()`](#filter)
+- [`arrange`](#arrange)
+- [`mutate`](#mutate)
+- [`summarize()` and `group_by()`](#summarize)
+- [The `tidyverse`](#tidyverse)
+]
+]
+
