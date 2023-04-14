@@ -55,6 +55,8 @@ options(device = function(file, width, height) {
 
 options(knitr.table.format = "html")
 
+opts_chunk$set(options(scipen=9999))
+
 ```
 # Prologue
 
@@ -75,7 +77,7 @@ Working with data in .mono[R].
 
 ## References
 
-Most of these slides come from the courses offered by [Ed Rubin](http://edrub.in/) ([@EC607](https://github.com/edrubin/EC607S23)) and [Grant MacDermott](https://grantmcdermott.com/) ([@EC607](https://github.com/uo-ec607/lectures)).
+Most of these slides come from the courses offered by [Ed Rubin](http://edrub.in/) ([@EC607](https://github.com/edrubin/EC607S23)) and [Grant McDermott](https://grantmcdermott.com/) ([@EC607](https://github.com/uo-ec607/lectures)).
 
 
 ---
@@ -126,7 +128,7 @@ A `data.frame` is .mono[R]'s base, spreadsheet-like object that holds variables.
 .ex[Example]
 
 ```{R, df_storms}
-storms[1:8,c(1:8, 10:11)] %>% data.frame()
+storms[1:8,c(1:8, 10:11)]
 ```
 
 ---
@@ -169,8 +171,6 @@ our_df
 --
 Notice that .mono[R] assumes we want to repeat `"apple"` for the entire column.
 
---
-Display the number of rows and columns of the `storms` dataset: 
 
 ---
 

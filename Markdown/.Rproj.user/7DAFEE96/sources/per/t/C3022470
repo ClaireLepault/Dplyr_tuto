@@ -1,9 +1,9 @@
 {
     "id": "C3022470",
-    "path": "~/Dropbox/PSE_doctorant/Prepa_visiting/Ed_courses/2023/Dplyr_Lab/Markdown/Tutorial_dplyr.md",
+    "path": "~/Dropbox/PSE_doctorant/Prepa_visiting/Ed_courses/2023/Dplyr_Lab/Dplyr_tuto/Markdown/Tutorial_dplyr.md",
     "project_path": "Tutorial_dplyr.md",
     "type": "markdown",
-    "hash": "1418176508",
+    "hash": "3318107922",
     "contents": "",
     "dirty": false,
     "created": 1681439091834.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "23,0",
-        "scrollLine": "8"
+        "cursorPosition": "2,16",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1681439919,
+    "lastKnownWriteTime": 1681498033,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1681439919197,
+    "last_content_update": 1681498033,
     "read_only": false,
     "read_only_alternatives": []
 }

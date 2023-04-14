@@ -1,21 +1,20 @@
 ---
 title: "Data frames and dplyr tutorial"
-date: 2023-04-13
+date: 2023-04-14
 output: html_document
 ---
 
-# Let's load the tidyverse meta-package and check the output.
-
-
-```{R setup, include = FALSE}
-library("tidyverse")
-knitr::opts_chunk$set(echo = TRUE,eval=TRUE)
+```{R, setup, include = F}
+knitr::opts_chunk$set(echo = TRUE)
 ```
+
+# Let's load the tidyverse meta-package and check the output.
 
 The tidyverse actually comes with a lot more packages than those that are just loaded automatically.
 
 
 ```R
+library("tidyverse")
 tidyverse_packages()
 ```
 
@@ -38,7 +37,7 @@ sprintf("%i rows x %i columns", nrow(storms), ncol(storms))
 
 
 ```R
-storms[1:6,c(1:8, 10:11)] %>% data.frame()
+storms[1:6,c(1:8, 10:11)]
 ```
 ---
 ## Creation

@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2023-04-13" />
+<meta name="date" content="2023-04-14" />
 
 <title>Data frames and dplyr tutorial</title>
 
@@ -363,24 +363,25 @@ pre code {
 
 
 <h1 class="title toc-ignore">Data frames and dplyr tutorial</h1>
-<h4 class="date">2023-04-13</h4>
+<h4 class="date">2023-04-14</h4>
 
 </div>
 
 
+<p><code>{R, setup, include = F} knitr::opts_chunk$set(echo = TRUE)</code></p>
 <div id="lets-load-the-tidyverse-meta-package-and-check-the-output." class="section level1">
 <h1>Let’s load the tidyverse meta-package and check the output.</h1>
-<p><code>{R setup, include = FALSE} library(&quot;tidyverse&quot;) knitr::opts_chunk$set(echo = TRUE,eval=TRUE)</code></p>
 <p>The tidyverse actually comes with a lot more packages than those that
 are just loaded automatically.</p>
-<pre class="r"><code>tidyverse_packages()</code></pre>
+<pre class="r"><code>library(&quot;tidyverse&quot;)
+tidyverse_packages()</code></pre>
 </div>
 <div id="data-frames" class="section level1">
 <h1>Data frames</h1>
 <pre class="r"><code>?storms</code></pre>
 <pre class="r"><code>head(storms,2)</code></pre>
 <pre class="r"><code>sprintf(&quot;%i rows x %i columns&quot;, nrow(storms), ncol(storms))</code></pre>
-<pre class="r"><code>storms[1:6,c(1:8, 10:11)] %&gt;% data.frame()</code></pre>
+<pre class="r"><code>storms[1:6,c(1:8, 10:11)]</code></pre>
 <pre class="r"><code>data.frame(var1 = 1:5, var2 = &quot;apple&quot;, var3 = rnorm(5))</code></pre>
 <pre class="r"><code># An object with value
 tmp &lt;- rnorm(5)
