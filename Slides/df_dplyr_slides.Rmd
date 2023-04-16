@@ -51,11 +51,11 @@ opts_chunk$set(
 opts_chunk$set(dev = "svg")
 options(device = function(file, width, height) {
   svg(tempfile(), width = width, height = height)
-})
+  }, 
+  scipen=999)
 
-options(knitr.table.format = "html")
-
-opts_chunk$set(options(scipen=9999))
+options(knitr.table.format = "html",
+        knitr_kable_format_args = list(digits = 2, scientific = FALSE))
 
 ```
 # Prologue
@@ -599,14 +599,14 @@ storms %>%
 
 # 4) mutate *cont.*
 
-Combining `mutate` with the `across` feature allows you to easily work on a subset of variables. For example:
+`mutate_if` allows you to easily work on a subset of variables. For example:
 
 ```{r, mutate2}
 storms %>% 
   select(name:status) %>% 
-  mutate(status=as.character(status),
-         across(where(is.character), toupper)) %>% 
-  head(3)
+  mutate(status=as.character(status))%>%
+  mutate_if(is.character, toupper) %>%
+  head(5)
 ```
 
 ---

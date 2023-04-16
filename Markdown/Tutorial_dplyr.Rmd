@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 The tidyverse actually comes with a lot more packages than those that are just loaded automatically.
 
 
-```R
+```{R pres}
 library("tidyverse")
 tidyverse_packages()
 ```
@@ -21,34 +21,34 @@ tidyverse_packages()
 # Data frames
 
 
-```R
+```{R df1}
 ?storms
 ```
 
 
-```R
+```{R df2}
 head(storms,2)
 ```
 
 
-```R
+```{R df3}
 sprintf("%i rows x %i columns", nrow(storms), ncol(storms))
 ```
 
 
-```R
+```{R df4}
 storms[1:6,c(1:8, 10:11)]
 ```
 ---
 ## Creation
 ---
 
-```R
+```{R dfcrea1}
 data.frame(var1 = 1:5, var2 = "apple", var3 = rnorm(5))
 ```
 
 
-```R
+```{R dfcrea2}
 # An object with value
 tmp <- rnorm(5)
 # Creating the data frame
@@ -58,19 +58,19 @@ our_df <- data.frame(var1 = 1:5, var2 = "apple", var3 = tmp)
 ## Naming
 
 
-```R
+```{R dfname1}
 names(our_df)
 ```
 
 
-```R
+```{R dfname2}
 # Set new names
 names(our_df) <- c("name1", "name2", "name3")
 names(our_df)
 ```
 
 
-```R
+```{R dfname3}
 # Change the name of the second variable(only)
 names(our_df)[2] <- "col2"
 names(our_df)
@@ -80,65 +80,65 @@ names(our_df)
 #### Option 1. Index data frames just as you index matrices in R
 
 
-```R
+```{R dfindex1}
 our_df[1,1]# grabs the value in the first row of the first variable.
 ```
 
 
-```R
+```{R dfindex2}
 our_df[2,]# returns the second row of `our_df` (as a data frame).
 ```
 
 
-```R
+```{R dfindex3}
 our_df[,3] #returns the third column (`name3`) of `our_df` (as a vector).
 ```
 
 #### Option 2. Reference values/variables using columns' names.
 
 
-```R
+```{R dfindex4}
 our_df$name1 #returns the column named `name1` (as a vector). .hi[Top:] `$`
 ```
 
 
-```R
+```{R dfindex5}
 our_df[,"name1"] #returns the column named `name1` (as a vector).
 ```
 
 
-```R
+```{R dfindex6}
 our_df["name1"] #returns the column named `x` (as a data frame).
 ```
 
 
-```R
+```{R dfindex7}
 our_df[,c("name1","col2")] #returns a data frame with variables `"name1"` and `"col2"`
 ```
 
 ## Adding variables
 
 
-```R
+```{R dfvar1}
 # Add a variable to our_df
 our_df$new_var <- 6:10
 ```
 
 
-```R
+```{R dfvar2}
 # Create interaction: multi = var1 * new_var
 our_df$multi <- our_df$name1 * our_df$new_var
 ```
 
 
-```R
+```{R dfvar3}
 our_df
 ```
 
 # Dplyr
 
 
-```R
+```{R dplyr1}
 # Pipe example
 rnorm(10) %>% mean()
 ```
@@ -146,21 +146,21 @@ rnorm(10) %>% mean()
 ## Select
 
 
-```R
+```{R select1}
 storms %>% 
   select(name:hour, wind, pressure, -day)%>%
   head(8)
 ```
 
 
-```R
+```{R select2}
 storms %>% 
   select(name, contains("diameter"))%>%
   tail(5) #tail shows you the last x (here 5) rows of the dataframe
 ```
 
 
-```R
+```{R select3}
 storms %>%
   select(alias=name, year, month, day, hour,
          wind_speed=wind, ts_diameter=tropicalstorm_force_diameter)%>%
@@ -170,7 +170,7 @@ storms %>%
 ## Filter
 
 
-```R
+```{R filter1}
 storms %>% 
   select(name,year,month,day)%>%
   filter(year==2008,
@@ -179,7 +179,7 @@ storms %>%
 ```
 
 
-```R
+```{R filter2}
 storms %>% 
   select(name,year,month,day)%>%
   filter(year==2008|
@@ -188,7 +188,7 @@ storms %>%
 ```
 
 
-```R
+```{R filter3}
 storms %>% 
   select(name:status)%>%
   filter(grepl("tropical", status))%>%
@@ -196,7 +196,7 @@ storms %>%
 ```
 
 
-```R
+```{R filter4}
 storms %>% 
   select(name,year,month,day,hour,
          ts_diameter=tropicalstorm_force_diameter)%>%
@@ -207,7 +207,7 @@ storms %>%
 ## Arrange
 
 
-```R
+```{R arrange1}
 storms %>% 
   select(name,year,month,day,hour,
          ts_diameter=tropicalstorm_force_diameter)%>%
@@ -217,7 +217,7 @@ storms %>%
 ```
 
 
-```R
+```{R arrange2}
 storms %>% 
   select(name,year,month,day,hour,
          ts_diameter=tropicalstorm_force_diameter)%>%
@@ -229,7 +229,7 @@ storms %>%
 ## Mutate
 
 
-```R
+```{R mutate1}
 storms %>% 
   select(name, year, month) %>%
   mutate(decade = paste0(substr(year, start = 1, stop = 3),0),
@@ -241,7 +241,7 @@ storms %>%
 ```
 
 
-```R
+```{R mutate2}
 storms %>% 
   select(name:status) %>% 
   mutate(status=as.character(status)) %>% 
@@ -250,7 +250,7 @@ storms %>%
 ```
 
 
-```R
+```{R mutate3}
 storms %>% 
   select(name:status) %>% 
   mutate_at(vars(name,status), list(UP =~ toupper(.))) %>%
@@ -260,7 +260,7 @@ storms %>%
 ## Summarize and group_by
 
 
-```R
+```{R summarize1}
 storms %>% 
   select(name, year, wind, pressure) %>%
   mutate(decade = paste0(substr(year, start = 1, stop = 3),0))%>%
@@ -271,7 +271,7 @@ storms %>%
 ```
 
 
-```R
+```{R summarize2}
 storms %>%
   summarize(mean_ts_diameter = mean(tropicalstorm_force_diameter))
 storms %>% 
@@ -279,7 +279,7 @@ storms %>%
 ```
 
 
-```R
+```{R summarize3}
 storms %>% 
   select(name, year, wind, pressure) %>%
   mutate(decade = paste0(substr(year, start = 1, stop = 3),0))%>%
@@ -289,7 +289,7 @@ storms %>%
 ```
 
 
-```R
+```{R summarize4}
 storms %>% 
   select(year, wind, pressure) %>%
   mutate(decade = paste0(substr(year, start = 1, stop = 3),0))%>%
